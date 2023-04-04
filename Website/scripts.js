@@ -79,7 +79,36 @@ function annotateImage(data) {
     phone.value =entities['phone'];
 }
 
+function saveContact() {
+    //sending the edited contact info to the backend
 
+    let email = document.getElementById("email").value;
+    let name = document.getElementById("name").value;
+    let address = document.getElementById("address").value;
+    let url = document.getElementById("url").value;
+    let phone = document.getElementById("phone").value;
+
+    let entity_data = { "name":name,
+                    "email":email,
+                    "address":address,
+                    "phone":phone,
+                    "url":url}
+
+    return fetch(serverUrl + "/submit", {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(entity_data)
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new HttpError(response);
+        }
+    })
+}
 
 class HttpError extends Error {
     constructor(response) {

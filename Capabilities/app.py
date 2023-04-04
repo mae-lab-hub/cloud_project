@@ -68,7 +68,7 @@ def upload_image():
 
     #for now we just join all the same entities together and the user can remove the one they want
     #possible changes: each of the same entity is an option in a dropdown menu, but then if the user wants both entities saved together it wil be complicated to edit, example: New York and Florence st.
-    
+
     name = "  ".join(name)
     email  = " ".join(email)
     phone = " ".join(phone)
@@ -82,3 +82,14 @@ def upload_image():
                     "website":website}
 
     return image_info , entity_data
+
+
+
+#getting the edited contact info from the front end
+@app.route('/submit', methods = ['POST'], cors = True)
+def get_contact():
+    print("hi!!!")
+    contact_data = json.loads(app.current_request.raw_body)
+    print(contact_data)
+
+    #here should call the database service to save the info
