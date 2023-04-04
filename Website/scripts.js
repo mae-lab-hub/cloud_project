@@ -36,24 +36,49 @@ async function uploadImage() {
     })
 }
 
-function updateImage(image) {
+function updateImage(data) {
+
+    image = data[0]
+    console.log(data[1])
+
     document.getElementById("view").style.display = "block";
 
     let imageElem = document.getElementById("image");
     imageElem.src = image["fileUrl"];
     imageElem.alt = image["fileId"];
 
-    return image;
+    return data;
 }
 
 
 function uploadAndTranslate() {
     uploadImage()
-        .then(image => updateImage(image))
+        .then(data => updateImage(data))
+        .then(data => annotateImage(data))
         .catch(error => {
             alert("Error: " + error);
         })
 }
+
+
+function annotateImage(data) {
+
+
+    let entities = data[1]
+
+    let email = document.getElementById("email");
+    let name = document.getElementById("name");
+    let address = document.getElementById("address");
+    let url = document.getElementById("url");
+    let phone = document.getElementById("phone");
+
+    name.value =entities['name'];
+    email.value =entities['email'];
+    address.value =entities['address'];
+    url.value =entities['url'];
+    phone.value =entities['phone'];
+}
+
 
 
 class HttpError extends Error {
