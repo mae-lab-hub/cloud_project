@@ -93,6 +93,15 @@ def get_contact():
     print("hi!!!")
     contact_data = json.loads(app.current_request.raw_body)
     print(contact_data)
-    dynamo_service.save_item(contact_data)
+   # dynamo_service.save_item(contact_data)
+    #dynamo_service.delete_contact("Mae Mar")
+    #dynamo_service.update_contact(contact_data)
+    dynamo_service.query_contacts("CHRIS SALCEDO")
 
     #here should call the database service to save the info
+
+
+@app.route('/search', methods = ['POST'], cors = True)
+def search_contact():
+    print('in search site')
+    """processes file upload and saves file to storage service"""
