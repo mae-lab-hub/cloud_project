@@ -4,6 +4,7 @@ from chalicelib import recognition_service
 import base64
 import json
 from chalicelib import comprehend_service
+from chalicelib import dynamo_service
 
 
 
@@ -20,6 +21,7 @@ storage_location = 'contentcen301159608.aws.ai'
 storage_service = storage_service.StorageService(storage_location)
 recognition_service = recognition_service.RecognitionService(storage_service)
 comprehend_service = comprehend_service.ComprehendDetect()
+dynamo_service = dynamo_service.DynamoService()
 #####
 # RESTful endpoints
 #####
@@ -91,5 +93,6 @@ def get_contact():
     print("hi!!!")
     contact_data = json.loads(app.current_request.raw_body)
     print(contact_data)
+    dynamo_service.save_item(contact_data)
 
     #here should call the database service to save the info
