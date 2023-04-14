@@ -90,18 +90,37 @@ def upload_image():
 #getting the edited contact info from the front end
 @app.route('/submit', methods = ['POST'], cors = True)
 def get_contact():
-    print("hi!!!")
+    print("are we here?")
     contact_data = json.loads(app.current_request.raw_body)
     print(contact_data)
-   # dynamo_service.save_item(contact_data)
-    #dynamo_service.delete_contact("Mae Mar")
-    #dynamo_service.update_contact(contact_data)
-    dynamo_service.query_contacts("CHRIS SALCEDO")
-
-    #here should call the database service to save the info
+    dynamo_service.save_item(contact_data)
 
 
 @app.route('/search', methods = ['POST'], cors = True)
 def search_contact():
     print('in search site')
-    """processes file upload and saves file to storage service"""
+    data = json.loads(app.current_request.raw_body)
+    lead_name = data['lead_name']
+    print(lead_name)
+    items = dynamo_service.query_contacts(lead_name)
+
+    return items
+
+
+@app.route('/update', methods = ['POST'], cors = True)
+def search_contact():
+    print('in update site')
+    data = json.loads(app.current_request.raw_body)
+    dynamo_service.update_contact(data)
+
+    
+@app.route('/delete', methods = ['POST'], cors = True)
+def search_contact():
+    print('in delete site')
+    data = json.loads(app.current_request.raw_body)
+    lead_name = data['lead_name']
+    dynamo_service.delete_contact(lead_name)
+
+    
+
+
