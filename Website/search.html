@@ -23,27 +23,16 @@
         <div>
             <label for="name">First name:</label>
             <input type="text" id="name_search" name="name" required><br>
-            <button onclick="search()">Search</button>
+            <button onclick="searchAndUpdate()">Search</button>
         </div>
     
-        <table id="myTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Creation Date</th>
-                            <th>Address</th>
-                            <th>email</th>
-                            <th>Phone Number</th>
-                            <th>Site</th>
-                            <th><button onclick="edit">Edit</button></th>
-                        </tr>
-                </thead>
-         </table>
-        
 
         <div id="updateInputs">  
             
           
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name"><br>
+
 
             <label for="email">Email:</label>
             <input type="text" id="email" name="email"><br>
@@ -57,8 +46,8 @@
             <label for="url">URL:</label>
             <input type="text" id="url" name="url">
             
-            <button type="button" onclick="updateContact()">Save</button> 
-            
+            <button type="button" onclick="updateContact()">Update</button> 
+            <button type="button" onclick="deleteContact()">Delete</button> 
         </div>
     
 

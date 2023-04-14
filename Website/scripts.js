@@ -99,7 +99,7 @@ function saveContact() {
 
     
     let entity_data = { "lead_name":name,
-                    "creation_date":newdate,
+                    //"creation_date":newdate,
                     "email":email,
                     "address":address,
                     "phone_number":phone,
@@ -122,36 +122,6 @@ function saveContact() {
     })
 }
 
-function update(){
-
-     //fill the table with he information
-     let table = document.querySelector("table");
-     table.style.border = "1px solid #000"
- 
-     for (let i = 0; i < data.length; i++) {
-         let row = table.insertRow();
-
-         let name = row.insertCell(0);
-         name.innerHTML = data[i]["lead_name"];
- 
-         let creation_date = row.insertCell(1);
-         creation_date.innerHTML = data[i]["creation_date"];
- 
-         let address = row.insertCell(2);
-         address.innerHTML = data[i]["address"];
-
-         let email = row.insertCell(3);
-         email.innerHTML = data[i]["email"];
-
-         let phone_number = row.insertCell(4);
-         address.innerHTML = data[i]["phone_number"];
-
-         let site = row.insertCell(5);
-         site.innerHTML = data[i]["site"];
-
-     }
-
-}
 
 
 function search() {
@@ -160,29 +130,6 @@ function search() {
 
     let data ={"lead_name":name_search}
 
-/*
-    var dateObj = new Date();
-    var month = dateObj.getUTCMonth() + 1; //months from 1-12
-    var day = dateObj.getUTCDate();
-    var year = dateObj.getUTCFullYear();
-    var newdate = year + "/" + month + "/" + day;
-
-
-
-    let email = document.getElementById("email").value;
-    let name = document.getElementById("name").value;
-    let address = document.getElementById("address").value;
-    let url = document.getElementById("url").value;
-    let phone = document.getElementById("phone").value;
-
-    
-    let entity_data = { "lead_name":name,
-                    "creation_date":newdate,
-                    "email":email,
-                    "address":address,
-                    "phone_number":phone,
-                    "site":url}
-*/
     console.log(data)
     return fetch(serverUrl + "/search", {
         method: "POST",
@@ -201,6 +148,120 @@ function search() {
 }
 
 
+function fill_table(data){
+
+     //fill the table with he information
+     let table = document.querySelector("table");
+     table.style.border = "1px solid #000"
+ 
+     for (let i = 0; i < data.length; i++) {
+         let row = table.insertRow();
+
+         let name = row.insertCell(0);
+         name.innerHTML = data[i]["lead_name"];
+ 
+       
+         let address = row.insertCell(1);
+         address.innerHTML = data[i]["address"];
+         console.log(data[i]["address"])
+
+         let email = row.insertCell(2);
+         email.innerHTML = data[i]["email"];
+
+         let phone_number = row.insertCell(3);
+         phone_number.innerHTML = data[i]["phone_number"];
+
+         let site = row.insertCell(4);
+         site.innerHTML = data[i]["site"];
+
+     }
+
+}
+
+function  edit_info(contact){
+
+    let email = document.getElementById("email");
+    let name = document.getElementById("name");
+    let address = document.getElementById("address");
+    let url = document.getElementById("url");
+    let phone = document.getElementById("phone");
+
+    let data = contact[0]
+    name.value =data['lead_name'];
+    email.value =data['email'];
+    address.value =data['address'];
+    url.value =data['site'];
+    phone.value =data['phone_number'];
+
+
+}
+
+function searchAndUpdate() {
+    search()
+        .then(data => edit_info(data))
+        //.then(data => annotateImage(data))
+        .catch(error => {
+            alert("Error: " + error);
+        })
+}
+
+function updateContact(){
+    
+    let email = document.getElementById("email").value;
+    let name = document.getElementById("name").value;
+    let address = document.getElementById("address").value;
+    let url = document.getElementById("url").value;
+    let phone = document.getElementById("phone").value;
+    console.log("in update contact js")
+    
+    let entity_data = { "lead_name":name,
+                    //"creation_date":newdate,
+                    "email":email,
+                    "address":address,
+                    "phone_number":phone,
+                    "site":url}
+
+    console.log(entity_data)
+    return fetch(serverUrl + "/update", {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(entity_data)
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new HttpError(response);
+        }
+    })
+}
+
+
+function deleteContact(){
+    
+    let name = document.getElementById("name").value;
+ 
+    
+    let entity_data = { "lead_name":name}
+
+    console.log(entity_data)
+    return fetch(serverUrl + "/delete", {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(entity_data)
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new HttpError(response);
+        }
+    })
+}
 
 
 class HttpError extends Error {
