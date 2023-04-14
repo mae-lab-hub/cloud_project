@@ -82,18 +82,30 @@ function annotateImage(data) {
 function saveContact() {
     //sending the edited contact info to the backend
 
+
+    var dateObj = new Date();
+    var month = dateObj.getUTCMonth() + 1; //months from 1-12
+    var day = dateObj.getUTCDate();
+    var year = dateObj.getUTCFullYear();
+    var newdate = year + "/" + month + "/" + day;
+
+
+
     let email = document.getElementById("email").value;
     let name = document.getElementById("name").value;
     let address = document.getElementById("address").value;
     let url = document.getElementById("url").value;
     let phone = document.getElementById("phone").value;
 
-    let entity_data = { "name":name,
+    
+    let entity_data = { "lead_name":name,
+                    "creation_date":newdate,
                     "email":email,
                     "address":address,
                     "phone":phone,
                     "url":url}
 
+    console.log(entity_data)
     return fetch(serverUrl + "/submit", {
         method: "POST",
         headers: {
