@@ -1,65 +1,96 @@
-"use strict";
+const apiUrl = 'http://127.0.0.1:8000';
+const userId = 'user1';
 
-const serverUrl = "http://127.0.0.1:8000";
-//const serverUrl = "https://a69yh7mtx3.execute-api.us-east-1.amazonaws.com/api/";
+async function processImage() {
+  const imageInput = document.getElementById('image');
+  const formData = new FormData();
+  formData.append('image', imageInput.files[0]);
 
-async function uploadImage() {
-    // encode input file as base64 string for upload
-    let file = document.getElementById("file").files[0];
-    let converter = new Promise(function(resolve, reject) {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result
-            .toString().replace(/^data:(.*,)?/, ''));
-        reader.onerror = (error) => reject(error);
-    });
-    let encodedString = await converter;
+  const response = await fetch(apiUrl + '/process_image', {
+    method: 'POST',
+    body: formData
+  });
 
-    // clear file upload input field
-    document.getElementById("file").value = "";
-
-    // make server call to upload image
-    // and return the server upload promise
-    return fetch(serverUrl + "/images", {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({filename: file.name, filebytes: encodedString})
-    }).then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new HttpError(response);
-        }
-    })
+  const data = await response.json();
+  fillForm(data);
 }
 
-function updateImage(image) {
-    document.getElementById("view").style.display = "block";
-
-    let imageElem = document.getElementById("image");
-    imageElem.src = image["fileUrl"];
-    imageElem.alt = image["fileId"];
-
-    return image;
+function fillForm(data) {
+  document.getElementById('name').value = data.name || '';
+  document.getElementById('phone_numbers').value = data.phone_numbers.join(', ') || '';
+  document.getElementById('email').value = data.email || '';
+  document.getElementById('website').value = data.website || '';
+  document.getElementById('address').value = data.address || '';
 }
 
+function submitForm() {
+  const name = document.getElementById('name').value;
+  const phoneNumbers = document.getElementById('phone_numbers').value;
+  const email = document.getElementById('email').value;
+  const website = document.getElementById('website').value;
+  const address = document.getElementById('address').value;
 
-function uploadAndTranslate() {
-    uploadImage()
-        .then(image => updateImage(image))
-        .catch(error => {
-            alert("Error: " + error);
-        })
+  const phoneNumbersArray = phoneNumbers.split(',').map(phoneNumber => phoneNumber.trim());
+
+ const requestData = {
+    name: name, 
+    phone_numbers: phoneNumbersArray,
+    email: email,
+    website: website,
+    address: address,
+    user_id: 'user1' 
+  };
+
+  fetch(apiUrl + '/save_data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Response:', data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
 }
 
+async function searchLead() {
+  const leadName = document.getElementById('search_lead_name').value;
 
-class HttpError extends Error {
-    constructor(response) {
-        super(`${response.status} for ${response.url}`);
-        this.name = "HttpError";
-        this.response = response;
-    }
+  const requestData = {
+    lead_name: leadName,
+    user_id: userId
+  };
+
+  const response = await fetch(apiUrl + '/search_lead', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestData)
+  });
+
+  const data = await response.json();
+  const results = data.results || [];
+  displayResults(results);
+}
+
+function displayResults(results) {
+  const resultsContainer = document.getElementById('search_results');
+  resultsContainer.innerHTML = '';
+
+  results.forEach(result => {
+    const resultDiv = document.createElement('div');
+    resultDiv.innerHTML = `
+      <p><strong>Name:</strong> ${result.name}</p>
+      <p><strong>Phone Numbers:</strong> ${result.phone_numbers.join(', ')}</p>
+      <p><strong>Email:</strong> ${result.email}</p>
+      <p><strong>Website:</strong> ${result.website}</p>
+      <p><strong>Address:</strong> ${result.address}</p>
+    `;
+    resultsContainer.appendChild(resultDiv);
+  });
 }
