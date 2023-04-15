@@ -4,9 +4,8 @@ import uuid
 from chalice import Chalice, BadRequestError, CORSConfig
 from requests_toolbelt.multipart import decoder
 from boto3.dynamodb.conditions import Key
-from urllib.parse import unquote
 
-app = Chalice(app_name='business-card-ocr')
+app = Chalice(app_name='business-card')
 app.api.cors = True
 cors_config = CORSConfig(
     allow_origin='*',
@@ -88,69 +87,62 @@ def extract_info(rekognition_response):
 @app.route('/save_data', methods=['POST'], content_types=['application/json'])
 def save_data():
     data = app.current_request.json_body
-    data['user_id'] = 'user1'  # Hardcoded user ID for now
-    data['id'] = str(uuid.uuid4())  # Generate a unique ID for the lead
-
-    # Save the item to DynamoDB
-    leads_table.put_item(Item=data)
-
-    return {'status': 'success'}
-
-
-@app.route('/get_lead/{lead_name}', methods=['GET'])
-def get_lead(lead_name):
-    response = leads_table.scan(
-        FilterExpression="contains(#name, :lead_name)",
-        ExpressionAttributeNames={"#name": "name"},
-        ExpressionAttributeValues={":lead_name": lead_name}
-    )
-    return response['Items']
-
-
-@app.route('/update_lead/{lead_id}', methods=['PUT'])
-def update_lead(lead_id):
-    data = app.current_request.json_body
-    user_id = data.get('user_id')
+    user_id = data.get('user_id')  # Get user_id from the request
+    image_id = data.get('image_id')  # Get image_id from the request
 
     if not user_id:
-        raise BadRequestError("Missing user_id")
+        raise BadRequestError("User ID is required")
 
-    lead = leads_table.get_item(Key={'id': lead_id}).get('Item')
-    if not lead:
-        raise BadRequestError("Lead not found")
+    if not image_id:
+        raise BadRequestError("Image ID is required")
 
-    if lead['user_id'] != user_id:
-        raise BadRequestError("You can only update records you created")
+    data['user_id'] = user_id
 
-    update_expression = "SET "
-    expression_attribute_values = {}
-    expression_attribute_names = {}
-    for key, value in data.items():
-        if key != 'user_id':
-            update_expression += f"#{key} = :{key}, "
-            expression_attribute_values[f":{key}"] = value
-            expression_attribute_names[f"#{key}"] = key
+    # Check if the lead with the same user_id and image_id already exists
+    existing_lead = leads_table.query(
+        IndexName='user_id-image_id-index',
+        KeyConditionExpression=Key('user_id').eq(user_id) & Key('image_id').eq(image_id)
+    ).get('Items')
 
-    update_expression = update_expression.rstrip(', ')
+    if existing_lead:
+        # Update the existing lead
+        lead_id = existing_lead[0]['id']
+        data['lead_id'] = lead_id
 
-    leads_table.update_item(
-        Key={'id': lead_id},
-        UpdateExpression=update_expression,
-        ExpressionAttributeValues=expression_attribute_values,
-        ExpressionAttributeNames=expression_attribute_names
-    )
+    if 'lead_id' in data:
+        # Update existing lead
+        lead_id = data['lead_id']
+        lead = leads_table.get_item(Key={'user_id': user_id, 'id': lead_id}).get('Item')
+        if not lead:
+            raise BadRequestError("Lead not found")
+
+        if lead['user_id'] != user_id:
+            raise BadRequestError("You can only update records you created")
+
+        update_expression = "SET "
+        expression_attribute_values = {}
+        expression_attribute_names = {}
+        for key, value in data.items():
+            if key not in ['user_id', 'lead_id']:
+                update_expression += f"#{key} = :{key}, "
+                expression_attribute_values[f":{key}"] = value
+                expression_attribute_names[f"#{key}"] = key
+
+        update_expression = update_expression.rstrip(', ')
+
+        leads_table.update_item(
+            Key={'user_id': user_id, 'id': lead_id},
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_attribute_values,
+            ExpressionAttributeNames=expression_attribute_names
+        )
+    else:
+        # Create new lead
+        data['id'] = str(uuid.uuid4())  # Generate a unique ID for the lead
+
+        # Save the item to DynamoDB
+        leads_table.put_item(Item=data)
+
     return {'status': 'success'}
 
-@app.route('/search_lead', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
-def search_lead():
-    data = app.current_request.raw_body.decode('utf-8').split('&')
-    data = dict(item.split('=') for item in data)
-    lead_name = unquote(data['lead_name']).replace('+', ' ')
 
-    # Query using the Global Secondary Index "user_id-name-index"
-    response = leads_table.query(
-        IndexName='user_id-name-index',
-        KeyConditionExpression=Key('user_id').eq('user1') & Key('name').eq(lead_name)
-    )
-
-    return {'results': response['Items']}
