@@ -1,62 +1,110 @@
-<!doctype html>
-<html lang="en"/>
+<!DOCTYPE html>
+<html lang="english">
+  <head>
+    <title>exported project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
 
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style data-tag="reset-style-sheet">
+      html {  line-height: 1.15;}body {  margin: 0;}* {  box-sizing: border-box;  border-width: 0;  border-style: solid;}p,li,ul,pre,div,h1,h2,h3,h4,h5,h6,figure,blockquote,figcaption {  margin: 0;  padding: 0;}button {  background-color: transparent;}button,input,optgroup,select,textarea {  font-family: inherit;  font-size: 100%;  line-height: 1.15;  margin: 0;}button,select {  text-transform: none;}button,[type="button"],[type="reset"],[type="submit"] {  -webkit-appearance: button;}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="reset"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner {  border-style: none;  padding: 0;}button:-moz-focus,[type="button"]:-moz-focus,[type="reset"]:-moz-focus,[type="submit"]:-moz-focus {  outline: 1px dotted ButtonText;}a {  color: inherit;  text-decoration: inherit;}input {  padding: 2px 4px;}img {  display: block;}html { scroll-behavior: smooth  }
+    </style>
+    <style data-tag="default-style-sheet">
+      html {
+        font-family: Inter;
+        font-size: 16px;
+      }
 
-    <title>Search</title>
+      body {
+        font-weight: 400;
+        font-style:normal;
+        text-decoration: none;
+        text-transform: none;
+        letter-spacing: normal;
+        line-height: 1.15;
+        color: var(--dl-color-gray-black);
+        background-color: var(--dl-color-gray-white);
 
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
-</head>
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
+      data-tag="font"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div>
+      <link href="./search.css" rel="stylesheet" />
 
-<body class="w3-theme-14">
-    <div style="min-width:400px">
-        <div class="w3-bar w3-large w3-theme-d4">
-            <span class="w3-bar-item">Search Contact</span>
-            
+      <div class="search-container">
+        <div class="search-search">
+          <img
+            src="public/playground_assets/image21546-2719-300w.png"
+            alt="image21546"
+            class="search-image2"
+          />
+          <img
+            src="public/playground_assets/button104019-vut7-200h.png"
+            alt="Button104019"
+            class="search-button10"
+          />
+          <span class="search-text"><span>Search</span></span>
+          <span class="search-text02">
+            <span>© All Rights Reserved Scan Mate 2023</span>
+          </span>
+          <img
+            src="public/playground_assets/button114021-gfqw-200h.png"
+            alt="Button114021"
+            class="search-button11"
+          />
+          <img
+            src="public/playground_assets/button124023-3d49-200h.png"
+            alt="Button124023"
+            class="search-button12"
+          />
+          <img
+            src="public/playground_assets/textinputfield134024-sa4c-200h.png"
+            alt="Textinputfield134024"
+            class="search-textinputfield13"
+          />
+          <span class="search-text04"><span>Enter Name:</span></span>
+          <img
+            src="public/playground_assets/textinoutfield154127-d7mh-200h.png"
+            alt="Textinoutfield154127"
+            class="search-textinoutfield15"
+          />
+          <img
+            src="public/playground_assets/textinputfield164128-w1cj-200h.png"
+            alt="TextInputfield164128"
+            class="search-text-inputfield16"
+          />
+          <img
+            src="public/playground_assets/textinputfield4129-9379-200h.png"
+            alt="Textinputfield4129"
+            class="search-textinputfield"
+          />
+          <img
+            src="public/playground_assets/textinputfield184130-7hac-200h.png"
+            alt="TextInputfield184130"
+            class="search-text-inputfield18"
+          />
+          <span class="search-text06"><span>Email:</span></span>
+          <span class="search-text08"><span>Phone:</span></span>
+          <span class="search-text10"><span>Address:</span></span>
+          <span class="search-text12"><span>URL:</span></span>
+          <span class="search-text14"><span>Update</span></span>
+          <span class="search-text16"><span>Delete</span></span>
+          <img
+            src="public/playground_assets/rectangle67749-w1dd-200h.png"
+            alt="Rectangle67749"
+            class="search-rectangle6"
+          />
+          <span class="search-text18"><span>Upload</span></span>
+          <span class="search-text20"><span>Home</span></span>
         </div>
-        
-        <h2>Please enter name to seach for contact.</h2>
-
-        <div>
-            <label for="name">First name:</label>
-            <input type="text" id="name_search" name="name" required><br>
-            <button onclick="searchAndUpdate()">Search</button>
-        </div>
-    
-
-        <div id="updateInputs">  
-            
-          
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name"><br>
-
-
-            <label for="email">Email:</label>
-            <input type="text" id="email" name="email"><br>
-
-            <label for="phone">Phone:</label>
-            <input type="text" id="phone" name="phone"><br>
-
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address"><br>
-
-            <label for="url">URL:</label>
-            <input type="text" id="url" name="url">
-            
-            <button type="button" onclick="updateContact()">Update</button> 
-            <button type="button" onclick="deleteContact()">Delete</button> 
-        </div>
-    
-
-        
+      </div>
     </div>
-
-    <script src="scripts.js"></script>
-    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.132.0.min.js"></script>
-    
-</body>
-
+  </body>
 </html>

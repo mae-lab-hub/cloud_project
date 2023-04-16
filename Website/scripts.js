@@ -3,6 +3,41 @@
 const serverUrl = "http://127.0.0.1:8000";
 //const serverUrl = "https://a69yh7mtx3.execute-api.us-east-1.amazonaws.com/api/";
 
+// Define  variables 
+const homePage = document.querySelector('.home-container');
+const searchPage = document.querySelector('.search-container');
+const uploadPage = document.querySelector('.upload-container');
+
+const homeLink = document.querySelector('.home-text2');
+const searchLink = document.querySelector('.home-text4');
+const uploadLink = document.querySelector('.home-text6');
+
+// Define any functions 
+function showHomePage() {
+  homePage.style.display = 'block';
+  searchPage.style.display = 'none';
+  uploadPage.style.display = 'none';
+}
+
+function showSearchPage() {
+  homePage.style.display = 'none';
+  searchPage.style.display = 'block';
+  uploadPage.style.display = 'none';
+}
+
+function showUploadPage() {
+  homePage.style.display = 'none';
+  searchPage.style.display = 'none';
+  uploadPage.style.display = 'block';
+}
+
+// Attach event listeners to elements on the page
+homeLink.addEventListener('click', showHomePage);
+searchLink.addEventListener('click', showSearchPage);
+uploadLink.addEventListener('click', showUploadPage);
+
+
+
 async function uploadImage() {
     // encode input file as base64 string for upload
     let file = document.getElementById("file").files[0];
