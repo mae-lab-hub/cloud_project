@@ -14,7 +14,7 @@ async function processImage() {
   const data = await response.json();
   const imageId = 'image_' + new Date().getTime(); // Generate a new image ID
   const newUserId = 'user_' + new Date().getTime(); // Generate a new user ID
-  localStorage.setItem('userId', newUserId); // Update the localStorage with the new user ID
+  localStorage.setItem('user_id', newUserId); // Update the localStorage with the new user ID
   userId = newUserId; // Update the global variable userId
   fillForm({ ...data, image_id: imageId }); // Pass the image ID to the fillForm function
 }
@@ -37,7 +37,7 @@ function submitForm(leadId) {
   const website = document.getElementById('website').value;
   const address = document.getElementById('address').value;
   const imageId = document.getElementById('image_id').value;
-
+  const userId = localStorage.getItem('user_id');
   const phoneNumbersArray = phoneNumbers.split(',').map(phoneNumber => phoneNumber.trim());
 
   const requestData = {
@@ -65,6 +65,7 @@ function submitForm(leadId) {
   .then(response => response.json())
   .then(data => {
     console.log('Response:', data);
+   alert("Data submitted successfully. Please save your user id: " + userId);
   })
   .catch(error => {
     console.error('Error:', error);
@@ -151,7 +152,13 @@ function editLead(leadId) {
 }
 function deleteLead(leadId) {
   console.log("deleteLead called with leadId:", leadId);
-  fetch(apiUrl + '/delete_lead/' + encodeURIComponent(leadId), {
+  const userId = document.getElementById("search_user_id").value; // Retrieve the user_id from the search form
+
+  if (!userId || userId === "null") {
+    console.error("User ID is not set");
+    return;
+  }
+  fetch(apiUrl + '/delete_lead/' + encodeURIComponent(leadId) + '?user_id=' + encodeURIComponent(userId), {
     method: 'DELETE'
   })
     .then(response => {
@@ -161,7 +168,7 @@ function deleteLead(leadId) {
         const leadElement = document.getElementById(`lead_${leadId}`);
         leadElement.parentNode.removeChild(leadElement);
       } else {
-        console.error('Failed to delete the lead');
+        console.error('Failed to delete the lead, status:', response.status, 'text:', response.statusText);
       }
     })
     .catch(error => {

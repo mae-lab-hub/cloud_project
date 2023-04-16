@@ -11,10 +11,11 @@ app.api.cors = True
 
 cors_config = CORSConfig(
     allow_origin='*',
-    allow_headers=['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token'],
+    allow_headers=['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token', 'user_id'],
     max_age=600,
     expose_headers=['x-amzn-RequestId', 'x-amzn-ErrorType'],
 )
+
 
 s3 = boto3.client('s3')
 rekognition = boto3.client('rekognition')
@@ -181,11 +182,16 @@ def search_lead():
     return filtered_leads
 
 
-@app.route('/delete_lead/{lead_id}', methods=['DELETE'], cors=True)
+@app.route('/delete_lead/{lead_id}', methods=['DELETE'], cors=cors_config)
 def delete_lead(lead_id):
-    lead = leads_table.get_item(Key={'id': lead_id}).get('Item')
+    user_id = app.current_request.query_params.get('user_id')  # Get the user_id from the query parameters
+    if not user_id:
+        raise BadRequestError("User ID is required")
+
+    lead = leads_table.get_item(Key={'id': lead_id, 'user_id': user_id}).get('Item')
 
     if not lead:
+        app.log.error(f"Lead not found for lead_id: {lead_id}, user_id: {user_id}")
         raise BadRequestError("Lead not found")
 
     leads_table.delete_item(Key={'user_id': lead['user_id'], 'id': lead_id})
