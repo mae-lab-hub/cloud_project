@@ -5,7 +5,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <title>Pictorial Translator</title>
+    <title>Contact Saver</title>
 
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
@@ -14,11 +14,32 @@
 <body class="w3-theme-14">
     <div style="min-width:400px">
         <div class="w3-bar w3-large w3-theme-d4">
-            <span class="w3-bar-item">Pictorial Translator</span>
+            <span class="w3-bar-item">Contact Saver</span>
             
         </div>
 
-        <a href="">search</a>
+        <a href="search.html">search</a>
+      
+        <div class="w3-container w3-content">
+            <p class="w3-opacity"><b>Upload</b></p>
+            <input id="file" type="file" name="file" accept="image/*"/>
+            <input class="w3-button w3-blue-grey" type="submit" value="Upload"
+                   onclick="upload()"/>
+
+            <p class="w3-opacity"><b>Image</b></p>
+            <div id="view" class="w3-panel w3-white w3-card w3-display-container"
+                 style="display:none;">
+                <div style="float: left;">
+                    <img id="image" width="600"/>
+                </div>
+              
+                
+
+            </div>
+          
+
+        </div>
+
         <div>  
             
             <label for="name">First name:</label>
@@ -38,28 +59,6 @@
             
             <button type="button" onclick="saveContact()">Save</button> 
             
-        </div>
-        <div class="w3-container w3-content">
-            <p class="w3-opacity"><b>Upload</b></p>
-            <input id="file" type="file" name="file" accept="image/*"/>
-            <input class="w3-button w3-blue-grey" type="submit" value="Upload"
-                   onclick="uploadAndTranslate()"/>
-
-            <p class="w3-opacity"><b>Image</b></p>
-            <div id="view" class="w3-panel w3-white w3-card w3-display-container"
-                 style="display:none;">
-                <div style="float: left;">
-                    <img id="image" width="600"/>
-                </div>
-                <div style="float: right;">
-                    <h5>Translated Text:</h5>
-                    <div id="translations"/>
-                </div>
-                
-
-            </div>
-          
-
         </div>
     </div>
 

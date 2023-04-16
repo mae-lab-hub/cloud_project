@@ -77,6 +77,8 @@ def upload_image():
     address = " ".join(address)
     website = " ".join(website)
 
+
+
     entity_data = { "name":name,
                     "email":email,
                     "address":address,
@@ -90,7 +92,6 @@ def upload_image():
 #getting the edited contact info from the front end
 @app.route('/submit', methods = ['POST'], cors = True)
 def get_contact():
-    print("are we here?")
     contact_data = json.loads(app.current_request.raw_body)
     print(contact_data)
     dynamo_service.save_item(contact_data)

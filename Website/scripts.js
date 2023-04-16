@@ -1,7 +1,7 @@
 "use strict";
 
-const serverUrl = "http://127.0.0.1:8000";
-//const serverUrl = "https://a69yh7mtx3.execute-api.us-east-1.amazonaws.com/api/";
+//const serverUrl = "http://127.0.0.1:8000";
+const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
 
 async function uploadImage() {
     // encode input file as base64 string for upload
@@ -51,7 +51,7 @@ function updateImage(data) {
 }
 
 
-function uploadAndTranslate() {
+function upload() {
     uploadImage()
         .then(data => updateImage(data))
         .then(data => annotateImage(data))
@@ -72,7 +72,7 @@ function annotateImage(data) {
     let url = document.getElementById("url");
     let phone = document.getElementById("phone");
 
-    name.value =entities['name'];
+    name.value =entities['name'].toLowerCase();
     email.value =entities['email'];
     address.value =entities['address'];
     url.value =entities['url'];
