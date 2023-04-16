@@ -36,7 +36,7 @@ function submitForm(leadId) {
   const email = document.getElementById('email').value;
   const website = document.getElementById('website').value;
   const address = document.getElementById('address').value;
-  const imageId = document.getElementById('image_id').value; // Add this line
+  const imageId = document.getElementById('image_id').value;
 
   const phoneNumbersArray = phoneNumbers.split(',').map(phoneNumber => phoneNumber.trim());
 
@@ -71,51 +71,75 @@ function submitForm(leadId) {
   });
 }
 
-
 async function searchLead() {
-  const leadName = document.getElementById('search_lead_name').value;
+    const searchName = document.getElementById("search_name").value;
+    const searchUserId = document.getElementById("search_user_id").value;
 
-  const response = await fetch(apiUrl + '/search_lead', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  },
-  body: `lead_name=${encodeURIComponent(leadName)}&user_id=${encodeURIComponent(userId)}`
-});
+    const searchCriteria = {
+        searchName,
+        searchUserId,
+    };
 
+    console.log("Search criteria: ", searchCriteria);
 
-  const data = await response.json();
-  const results = data.results || [];
-  displayResults(results);
+    const response = await fetch(`${apiUrl}/search_lead`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: new URLSearchParams({
+            lead_name: searchName,
+        }).toString(),
+    });
+
+    const leads = await response.json();
+
+    displayLeads(leads, searchUserId);
 }
 
-function displayResults(results) {
+
+function displayLeads(results, searchUserId) {
   const resultsContainer = document.getElementById('search_results');
   resultsContainer.innerHTML = '';
 
   results.forEach(result => {
     const resultDiv = document.createElement('div');
+    resultDiv.id = `lead_${result.id}`; // Add an ID to the result div
     resultDiv.innerHTML = `
       <p><strong>Name:</strong> ${result.name}</p>
-      <p><strong>Phone Numbers:</strong> ${result.phone_numbers.join(', ')}</p>
-      <p><strong>Email:</strong> ${result.email}</p>
-      <p><strong>Website:</strong> ${result.website}</p>
-      <p><strong>Address:</strong> ${result.address}</p>
-      <button onclick="editLead('${result.lead_id}')">Update</button>
+      <p><strong>Telephone number (s):</strong> ${result.phone_numbers.join(', ')}</p>
+      <p><strong>Email address:</strong> ${result.email}</p>
+      <p><strong>Company website:</strong> ${result.website}</p>
+      <p><strong>Company address:</strong> ${result.address}</p>
     `;
+    // Check if both the user ID and name match the search criteria
+    if (result.user_id === searchUserId && result.name.toLowerCase() === document.getElementById("search_name").value.toLowerCase()) {
+      resultDiv.innerHTML += `<button onclick="editLead('${result.id}')">Update</button>`;
+      resultDiv.innerHTML += `<button onclick="deleteLead('${result.id}')">Delete</button>`;
+    }
+
     resultsContainer.appendChild(resultDiv);
   });
 }
 
+
 function editLead(leadId) {
   // Fetch the lead data using the provided leadId
+  console.log("editLead called with leadId:", leadId);
   fetch(apiUrl + '/get_lead/' + encodeURIComponent(leadId), {
     method: 'GET'
   })
     .then(response => response.json())
     .then(data => {
-      // Pre-fill the form with the existing data
-      fillForm(data);
+      // Pre-fill the form with only the required data
+      fillForm({
+        name: data.name,
+        phone_numbers: data.phone_numbers,
+        email: data.email,
+        website: data.website,
+        address: data.address,
+        image_id: data.image_id
+      });
       // Add an event listener to the submit button to call submitForm with the leadId when updating
       document.getElementById('submit_button').addEventListener('click', () => {
         submitForm(leadId);
@@ -125,4 +149,22 @@ function editLead(leadId) {
       console.error('Error:', error);
     });
 }
-
+function deleteLead(leadId) {
+  console.log("deleteLead called with leadId:", leadId);
+  fetch(apiUrl + '/delete_lead/' + encodeURIComponent(leadId), {
+    method: 'DELETE'
+  })
+    .then(response => {
+      if (response.ok) {
+        console.log('Lead deleted successfully');
+        // Remove the lead element from the search results
+        const leadElement = document.getElementById(`lead_${leadId}`);
+        leadElement.parentNode.removeChild(leadElement);
+      } else {
+        console.error('Failed to delete the lead');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}

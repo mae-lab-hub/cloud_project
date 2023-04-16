@@ -4,15 +4,18 @@ import uuid
 from chalice import Chalice, BadRequestError, CORSConfig
 from requests_toolbelt.multipart import decoder
 from boto3.dynamodb.conditions import Key
+from urllib.parse import parse_qs
 
 app = Chalice(app_name='business-card')
 app.api.cors = True
+
 cors_config = CORSConfig(
     allow_origin='*',
-    allow_headers=['Content-Type', 'Authorization'],
+    allow_headers=['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token'],
     max_age=600,
-    expose_headers=['Content-Type', 'Authorization']
+    expose_headers=['x-amzn-RequestId', 'x-amzn-ErrorType'],
 )
+
 s3 = boto3.client('s3')
 rekognition = boto3.client('rekognition')
 dynamodb = boto3.resource('dynamodb')
@@ -25,7 +28,7 @@ REGION = 'us-east-1'
 leads_table = dynamodb.Table(TABLE_NAME)
 
 
-@app.route('/process_image', methods=['POST'], content_types=['multipart/form-data'])
+@app.route('/process_image', methods=['POST'], content_types=['multipart/form-data'], cors=cors_config)
 def process_image():
     content_type = app.current_request.headers['content-type']
 
@@ -146,3 +149,45 @@ def save_data():
     return {'status': 'success'}
 
 
+@app.route('/get_lead/{lead_id}', methods=['GET'], cors=True)
+def get_lead(lead_id):
+    lead = leads_table.get_item(Key={'id': lead_id}).get('Item')
+    # Add user_id to the response
+    return {
+        'name': lead['name'],
+        'phone_numbers': lead['phone_numbers'],
+        'email': lead['email'],
+        'website': lead['website'],
+        'address': lead['address'],
+        'user_id': lead['user_id']
+    }
+
+
+@app.route('/search_lead', methods=['POST'], cors=cors_config, content_types=['application/x-www-form-urlencoded'])
+def search_lead():
+    parsed_body = parse_qs(app.current_request.raw_body.decode(), keep_blank_values=True)
+    search_name = parsed_body.get('lead_name', [''])[0]
+    if not search_name:
+        raise BadRequestError("Name is required for search")
+
+    response = leads_table.scan()
+    leads = response['Items']
+
+    filtered_leads = [
+        lead for lead in leads
+        if lead['name'].lower() == search_name.lower()
+    ]
+
+    return filtered_leads
+
+
+@app.route('/delete_lead/{lead_id}', methods=['DELETE'], cors=True)
+def delete_lead(lead_id):
+    lead = leads_table.get_item(Key={'id': lead_id}).get('Item')
+
+    if not lead:
+        raise BadRequestError("Lead not found")
+
+    leads_table.delete_item(Key={'user_id': lead['user_id'], 'id': lead_id})
+
+    return {'status': 'success'}
