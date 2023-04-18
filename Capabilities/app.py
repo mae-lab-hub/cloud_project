@@ -5,7 +5,7 @@ import base64
 import json
 from chalicelib import comprehend_service
 from chalicelib import dynamo_service
-
+from chalicelib import iam_service
 
 
 #####
@@ -22,6 +22,11 @@ storage_service = storage_service.StorageService(storage_location)
 recognition_service = recognition_service.RecognitionService(storage_service)
 comprehend_service = comprehend_service.ComprehendDetect()
 dynamo_service = dynamo_service.DynamoService()
+iam_service = iam_service.IAMService()
+
+
+user_id =""
+
 #####
 # RESTful endpoints
 #####
@@ -31,7 +36,11 @@ def upload_image():
     request_data = json.loads(app.current_request.raw_body)
     file_name = request_data['filename']
     file_bytes = base64.b64decode(request_data['filebytes'])
+    user_id = request_data['userid']
+    dynamo_service.user_id = request_data['userid']
 
+    print("HEREEEEEE")
+    print("User id:", user_id)
     image_info = storage_service.upload_file(file_bytes, file_name)
     text_lines = recognition_service.detect_text(file_name)
 
@@ -94,6 +103,8 @@ def upload_image():
 def get_contact():
     contact_data = json.loads(app.current_request.raw_body)
     print(contact_data)
+    print("user in submit", user_id)
+    #iam_service.list_users()
     dynamo_service.save_item(contact_data)
 
 
@@ -102,9 +113,10 @@ def search_contact():
     print('in search site')
     data = json.loads(app.current_request.raw_body)
     lead_name = data['lead_name']
+    user_id = data['user_id']
     print(lead_name)
     items = dynamo_service.query_contacts(lead_name)
-
+    print("in serach:", items)
     return items
 
 

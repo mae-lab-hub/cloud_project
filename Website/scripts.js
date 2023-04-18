@@ -1,8 +1,9 @@
 "use strict";
 
-//const serverUrl = "http://127.0.0.1:8000";
-const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
-
+const serverUrl = "http://127.0.0.1:8000";
+//const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
+let userId = "";
+let imageUserId =""
 async function uploadImage() {
     // encode input file as base64 string for upload
     let file = document.getElementById("file").files[0];
@@ -20,13 +21,16 @@ async function uploadImage() {
 
     // make server call to upload image
     // and return the server upload promise
+
+
+
     return fetch(serverUrl + "/images", {
         method: "POST",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({filename: file.name, filebytes: encodedString})
+        body: JSON.stringify({filename: file.name, filebytes: encodedString, userid: userId})
     }).then(response => {
         if (response.ok) {
             return response.json();
@@ -34,6 +38,8 @@ async function uploadImage() {
             throw new HttpError(response);
         }
     })
+
+    
 }
 
 function updateImage(data) {
@@ -79,6 +85,17 @@ function annotateImage(data) {
     phone.value =entities['phone'];
 }
 
+function generateId(){
+    //const imageId = 'image_' + new Date().getTime(); // Generate a new image ID
+    console.log("here")
+    const newUserId = 'user_' + new Date().getTime(); // Generate a new user ID
+   // localStorage.setItem('user_id', newUserId); // Update the localStorage with the new user ID
+    userId = newUserId; // Update the global variable userId
+    let userIdElement = document.getElementById("user_id");
+    userIdElement.value = userId;
+
+}
+
 function saveContact() {
     //sending the edited contact info to the backend
 
@@ -89,6 +106,7 @@ function saveContact() {
     var year = dateObj.getUTCFullYear();
 
 
+    let userIdElement = document.getElementById("user_id").value;
 
     let email = document.getElementById("email").value;
     let name = document.getElementById("name").value;
@@ -97,12 +115,15 @@ function saveContact() {
     let phone = document.getElementById("phone").value;
 
     
-    let entity_data = { "lead_name":name,
+    let entity_data = { 
+                    "user_id":userIdElement,
+                    "lead_name":name,
                     "email":email,
                     "address":address,
                     "phone_number":phone,
                     "site":url}
 
+                    
     console.log(entity_data)
     alert("Conact Saved!");
     return fetch(serverUrl + "/submit", {
@@ -127,8 +148,8 @@ function search() {
     //sending the edited contact info to the backend
     let name_search = document.getElementById("name_search").value;
 
-    let data ={"lead_name":name_search}
-
+    let data ={'user_id':userId,"lead_name":name_search}
+    
     console.log(data)
     return fetch(serverUrl + "/search", {
         method: "POST",
@@ -146,44 +167,19 @@ function search() {
     })
 }
 
-/*
-function fill_table(data){
 
-     //fill the table with he information
-     let table = document.querySelector("table");
-     table.style.border = "1px solid #000"
- 
-     for (let i = 0; i < data.length; i++) {
-         let row = table.insertRow();
-
-         let name = row.insertCell(0);
-         name.innerHTML = data[i]["lead_name"];
- 
-       
-         let address = row.insertCell(1);
-         address.innerHTML = data[i]["address"];
-         console.log(data[i]["address"])
-
-         let email = row.insertCell(2);
-         email.innerHTML = data[i]["email"];
-
-         let phone_number = row.insertCell(3);
-         phone_number.innerHTML = data[i]["phone_number"];
-
-         let site = row.insertCell(4);
-         site.innerHTML = data[i]["site"];
-
-     }
-
-}*/
 
 function  edit_info(contact){
 
+    console.log("here")
+    imageUserId = contact['user_id']
     let email = document.getElementById("email");
     let name = document.getElementById("name");
     let address = document.getElementById("address");
     let url = document.getElementById("url");
     let phone = document.getElementById("phone");
+   // let user_id_element = document.getElementById("userid");
+
 
     let data = contact[0]
     name.value =data['lead_name'];
@@ -191,6 +187,9 @@ function  edit_info(contact){
     address.value =data['address'];
     url.value =data['site'];
     phone.value =data['phone_number'];
+   // user_id_element.value = data['user_id']
+
+    console.log( data['user_id'])
 
 
 }
@@ -213,12 +212,18 @@ function updateContact(){
     let phone = document.getElementById("phone").value;
     console.log("in update contact js")
     
-    let entity_data = { "lead_name":name,
+    let entity_data = { "user_id":userId,
+                    "lead_name":name,
                     //"creation_date":newdate,
                     "email":email,
                     "address":address,
                     "phone_number":phone,
                     "site":url}
+
+                    console.log("Image id:")
+                    console.log(imageUserId)
+                    console.log("User id")
+                    console.log(userId)
     alert("Contact Updated!");
     console.log(entity_data)
     return fetch(serverUrl + "/update", {
@@ -227,7 +232,7 @@ function updateContact(){
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(entity_data)
+        body: JSON.stringify({entity_data,imageUserId})
     }).then(response => {
         if (response.ok) {
             return response.json();
