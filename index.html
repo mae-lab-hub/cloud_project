@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"/>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>Contact Saver</title>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
+</head>
+
+<body class="w3-theme-14">
+    <div style="min-width:400px">
+        <div class="w3-bar w3-large w3-theme-d4">
+            <span class="w3-bar-item">Contact Saver</span>
+            
+        </div>
+
+        <a href="search.html">search</a>
+      
+        <div class="w3-container w3-content">
+            <p class="w3-opacity"><b>Upload</b></p>
+            <input id="file" type="file" name="file" accept="image/*"/>
+            <input class="w3-button w3-blue-grey" type="submit" value="Upload"
+                   onclick="upload()"/>
+
+            <p class="w3-opacity"><b>Image</b></p>
+            <div id="view" class="w3-panel w3-white w3-card w3-display-container"
+                 style="display:none;">
+                <div style="float: left;">
+                    <img id="image" width="600"/>
+                </div>
+              
+                
+
+            </div>
+          
+
+        </div>
+
+        <div>  
+            
+            <label for="name">First name:</label>
+            <input type="text" id="name" name="name" required><br>
+
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email"><br>
+
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone"><br>
+
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address"><br>
+
+            <label for="url">URL:</label>
+            <input type="text" id="url" name="url">
+            
+            <button type="button" onclick="saveContact()">Save</button> 
+            
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.132.0.min.js"></script>
+    
+</body>
+
+</html>
