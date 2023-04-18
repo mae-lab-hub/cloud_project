@@ -87,7 +87,6 @@ function saveContact() {
     var month = dateObj.getUTCMonth() + 1; //months from 1-12
     var day = dateObj.getUTCDate();
     var year = dateObj.getUTCFullYear();
-    var newdate = year + "/" + month + "/" + day;
 
 
 
@@ -99,13 +98,13 @@ function saveContact() {
 
     
     let entity_data = { "lead_name":name,
-                    //"creation_date":newdate,
                     "email":email,
                     "address":address,
                     "phone_number":phone,
                     "site":url}
 
     console.log(entity_data)
+    alert("Conact Saved!");
     return fetch(serverUrl + "/submit", {
         method: "POST",
         headers: {
@@ -147,7 +146,7 @@ function search() {
     })
 }
 
-
+/*
 function fill_table(data){
 
      //fill the table with he information
@@ -176,7 +175,7 @@ function fill_table(data){
 
      }
 
-}
+}*/
 
 function  edit_info(contact){
 
@@ -220,7 +219,7 @@ function updateContact(){
                     "address":address,
                     "phone_number":phone,
                     "site":url}
-
+    alert("Contact Updated!");
     console.log(entity_data)
     return fetch(serverUrl + "/update", {
         method: "POST",
@@ -247,6 +246,7 @@ function deleteContact(){
     let entity_data = { "lead_name":name}
 
     console.log(entity_data)
+    alert("Contact Deleted!");
     return fetch(serverUrl + "/delete", {
         method: "POST",
         headers: {
