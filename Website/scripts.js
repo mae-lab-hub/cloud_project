@@ -1,7 +1,7 @@
 "use strict";
 
 //const serverUrl = "http://127.0.0.1:8000";
-const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
+ const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
 
 async function uploadImage() {
     // encode input file as base64 string for upload
@@ -18,7 +18,7 @@ async function uploadImage() {
     // clear file upload input field
     document.getElementById("file").value = "";
 
-    // make server call to upload image
+ // make server call to upload image
     // and return the server upload promise
     return fetch(serverUrl + "/images", {
         method: "POST",
@@ -38,17 +38,18 @@ async function uploadImage() {
 
 function updateImage(data) {
 
-    image = data[0]
-    console.log(data[1])
+    var image = data[0]
+    console.log(data)
 
     document.getElementById("view").style.display = "block";
 
     let imageElem = document.getElementById("image");
     imageElem.src = image["fileUrl"];
     imageElem.alt = image["fileId"];
-
     return data;
 }
+
+
 
 
 function upload() {
@@ -56,6 +57,7 @@ function upload() {
         .then(data => updateImage(data))
         .then(data => annotateImage(data))
         .catch(error => {
+            console.log(error);
             alert("Error: " + error);
         })
 }
@@ -75,8 +77,36 @@ function annotateImage(data) {
     name.value =entities['name'].toLowerCase();
     email.value =entities['email'];
     address.value =entities['address'];
-    url.value =entities['url'];
+    url.value =entities['website'];
     phone.value =entities['phone'];
+    downloadCsv(entities)
+}
+function downloadCsv(data){
+    const csvRows = [];
+    const headers = ["name", "email", "address", "phone", "website"];
+    csvRows.push(headers.join(","));
+    const values = [
+        data.name,
+        data.email,
+        `"${data.address}"`, 
+        data.phone,
+        data.website
+      ];
+    csvRows.push(values.join(","));
+    const csvBlob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(csvBlob);
+    downloadLink.download = "data.csv";
+    downloadLink.textContent = "Download CSV";
+    document.body.appendChild(downloadLink);
+
+    downloadLink.addEventListener("click", function(event) {
+    event.preventDefault();
+    downloadLink.style.display = "none";
+    document.body.removeChild(downloadLink);
+    window.location.href = downloadLink.href;
+
+    })
 }
 
 function saveContact() {
