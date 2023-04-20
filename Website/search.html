@@ -12,10 +12,25 @@
         <label>Lead Name: <input type="text" id="search_name" name="search_name"></label><br>
         <button type="button" onclick="searchLead()">Search</button>
     </form>
+    <!-- search.html -->
+    <form id="lead_form">
+        <input type="text" id="lead_name" placeholder="Name">
+        <input type="text" id="lead_phone_numbers" placeholder="Phone Numbers">
+        <input type="text" id="lead_email" placeholder="Email">
+        <input type="text" id="lead_website" placeholder="Website">
+        <input type="text" id="lead_address" placeholder="Address">
+        <input type="hidden" id="lead_id">
+        <input type="hidden" id="user_id">
+        <button type="button" onclick="submitForm()" style="display:none;">Update</button>
+    </form>
+
+
+
+
     <div id="search_results"></div>
 
     </form>
     <a href="index.html">Back to main page</a>
-    <script src="script.js"></script>
+    <script src="search.js"></script>
 </body>
 </html>

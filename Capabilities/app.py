@@ -6,27 +6,33 @@ from requests_toolbelt.multipart import decoder
 from boto3.dynamodb.conditions import Key
 from urllib.parse import parse_qs
 
-app = Chalice(app_name='business-card')
-app.api.cors = True
 
+app = Chalice(app_name='business-card')
+app.api.binary_types.append('*/*')
+app.api.cors = True
 cors_config = CORSConfig(
     allow_origin='*',
-    allow_headers=['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token', 'user_id'],
+    allow_headers=['Content-Type', 'X-Requested-With', 'X-Amz-Date', 'X-Amz-Security-Token', 'Authorization', 'X-Api-Key', 'X-Amz-User-Agent'],
     max_age=600,
-    expose_headers=['x-amzn-RequestId', 'x-amzn-ErrorType'],
+    expose_headers=['Content-Type', 'X-Requested-With', 'X-Amz-Date', 'X-Amz-Security-Token', 'Authorization', 'X-Api-Key', 'X-Amz-User-Agent']
 )
+
+BUCKET_NAME = ''
+TABLE_NAME = 'leads-contact'
 
 
 s3 = boto3.client('s3')
 rekognition = boto3.client('rekognition')
-dynamodb = boto3.resource('dynamodb')
+textract = boto3.client('textract')
 comprehend = boto3.client('comprehend')
+dynamodb = boto3.resource('dynamodb')
+leads_table = dynamodb.Table(TABLE_NAME)
 
-BUCKET_NAME = 'contentcen301217825.aws.ai'
-TABLE_NAME = 'leads-contact'
-REGION = 'us-east-1'
+
 
 leads_table = dynamodb.Table(TABLE_NAME)
+
+
 
 
 @app.route('/process_image', methods=['POST'], content_types=['multipart/form-data'], cors=cors_config)
@@ -47,7 +53,8 @@ def process_image():
     s3.put_object(Bucket=BUCKET_NAME, Key=object_name, Body=file.content,
                   ContentType=file.headers[b'Content-Type'].decode())
 
-    response = rekognition.detect_text(
+    # Amazon Rekognition
+    rekognition_response = rekognition.detect_text(
         Image={
             'S3Object': {
                 'Bucket': BUCKET_NAME,
@@ -56,12 +63,32 @@ def process_image():
         }
     )
 
-    extracted_info = extract_info(response)
+    rekognition_text_list = [text_detection['DetectedText'] for text_detection in rekognition_response['TextDetections']]
+
+    # Amazon Textract
+    textract_response = textract.analyze_document(
+        Document={
+            'S3Object': {
+                'Bucket': BUCKET_NAME,
+                'Name': object_name
+            }
+        },
+        FeatureTypes=['TABLES', 'FORMS']
+    )
+
+    textract_text_list = [block['Text'] for block in textract_response['Blocks'] if block['BlockType'] == 'WORD']
+
+    # Combine text from both Rekognition and Textract
+    text_list = list(set(rekognition_text_list + textract_text_list))
+    combined_text = ' '.join(text_list)
+    extracted_info = extract_info(text_list, combined_text)
     return extracted_info
 
 
-def extract_info(rekognition_response):
-    text_list = [text_detection['DetectedText'] for text_detection in rekognition_response['TextDetections']]
+def extract_info(text_list, combined_text):
+    # Use Comprehend to detect entities in the combined text
+    comprehend_response = comprehend.detect_entities(Text=combined_text, LanguageCode='en')
+    entities = comprehend_response['Entities']
 
     extracted_info = {
         'name': '',
@@ -70,25 +97,39 @@ def extract_info(rekognition_response):
         'website': '',
         'address': ''
     }
+
+    # Use regular expressions to extract information from text_list
     for text in text_list:
         if re.match(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text):
             extracted_info['email'] = text
-        elif re.match(r'(?:http|ftp|https)://(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?',
-                      text):
+        elif re.match(r'(?:http|ftp|https)://(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?', text):
             extracted_info['website'] = text
         elif re.match(r'\+?[0-9\s-]{8,15}', text):
             extracted_info['phone_numbers'].append(text)
-        # Try to detect the name based on the assumption that it is in title case (e.g., John Doe)
         elif re.match(r'(?:(?:[A-Z][a-z]+\s*){1,3})', text) and not extracted_info['name']:
             extracted_info['name'] = text
-        # Detect the address based on the assumption that it contains a combination of alphanumeric characters, spaces, and commas
         elif re.match(r'\d{1,5}\s\w+\s(\w+\s){0,4}\w+(\s\w+)?', text) and not extracted_info['address']:
             extracted_info['address'] = text
+
+    # Use Comprehend to extract information from the combined text
+    for entity in entities:
+        if entity['Type'] == 'PERSON' and not extracted_info['name']:
+            extracted_info['name'] = entity['Text']
+        elif entity['Type'] == 'EMAIL' and not extracted_info['email']:
+            extracted_info['email'] = entity['Text']
+        elif entity['Type'] == 'PHONE' and entity['Text'] not in extracted_info['phone_numbers']:
+            extracted_info['phone_numbers'].append(entity['Text'])
+        elif entity['Type'] == 'URL' and not extracted_info['website']:
+            extracted_info['website'] = entity['Text']
+        elif entity['Type'] == 'LOCATION' and not extracted_info['address']:
+            extracted_info['address'] = entity['Text']
 
     return extracted_info
 
 
-@app.route('/save_data', methods=['POST'], content_types=['application/json'])
+
+
+@app.route('/save_data', methods=['POST'], content_types=['application/json'], cors=cors_config)
 def save_data():
     data = app.current_request.json_body
     user_id = data.get('user_id')  # Get user_id from the request
@@ -150,9 +191,13 @@ def save_data():
     return {'status': 'success'}
 
 
-@app.route('/get_lead/{lead_id}', methods=['GET'], cors=True)
+@app.route('/get_lead/{lead_id}', methods=['GET'], cors=cors_config)
 def get_lead(lead_id):
-    lead = leads_table.get_item(Key={'id': lead_id}).get('Item')
+    user_id = app.current_request.query_params.get('user_id')
+    if not user_id:
+        raise BadRequestError("User ID is required.")
+
+    lead = leads_table.get_item(Key={'user_id': user_id, 'id': lead_id}).get('Item')
     # Add user_id to the response
     return {
         'name': lead['name'],
@@ -164,7 +209,7 @@ def get_lead(lead_id):
     }
 
 
-@app.route('/search_lead', methods=['POST'], cors=cors_config, content_types=['application/x-www-form-urlencoded'])
+@app.route('/search_lead', methods=['GET', 'POST'], cors=cors_config, content_types=['application/x-www-form-urlencoded'])
 def search_lead():
     parsed_body = parse_qs(app.current_request.raw_body.decode(), keep_blank_values=True)
     search_name = parsed_body.get('lead_name', [''])[0]
@@ -181,8 +226,42 @@ def search_lead():
 
     return filtered_leads
 
+@app.route('/update_lead/{lead_id}', methods=['PUT'], content_types=['application/json'], cors=cors_config)
+def update_lead(lead_id):
+    data = app.current_request.json_body
+    user_id = data.get('user_id')  # Get user_id from the request
 
-@app.route('/delete_lead/{lead_id}', methods=['DELETE'], cors=cors_config)
+    if not user_id:
+        raise BadRequestError("User ID is required")
+
+    lead = leads_table.get_item(Key={'user_id': user_id, 'id': lead_id}).get('Item')
+    if not lead:
+        raise BadRequestError("Lead not found")
+
+    if lead['user_id'] != user_id:
+        raise BadRequestError("You can only update records you created")
+
+    update_expression = "SET "
+    expression_attribute_values = {}
+    expression_attribute_names = {}
+    for key, value in data.items():
+        if key not in ['user_id', 'lead_id']:
+            update_expression += f"#{key} = :{key}, "
+            expression_attribute_values[f":{key}"] = value
+            expression_attribute_names[f"#{key}"] = key
+
+    update_expression = update_expression.rstrip(', ')
+
+    leads_table.update_item(
+        Key={'user_id': user_id, 'id': lead_id},
+        UpdateExpression=update_expression,
+        ExpressionAttributeValues=expression_attribute_values,
+        ExpressionAttributeNames=expression_attribute_names
+    )
+
+    return {'status': 'success'}
+
+@app.route('/delete_lead/{lead_id}', methods=['DELETE', 'POST', 'GET'], cors=cors_config)
 def delete_lead(lead_id):
     user_id = app.current_request.query_params.get('user_id')  # Get the user_id from the query parameters
     if not user_id:
