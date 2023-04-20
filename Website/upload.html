@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Contact Saver</title>
+    <link rel="stylesheet" href="upload.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
+</head>
+
+<body class="w3-theme-14">
+    <div style="min-width:400px">
+        <div class="w3-bar w3-large w3-theme-d4">
+            <img src="image11225-bhp-200h.png" alt="Logo" style="margin-right: 10px; height: 50px;"/>
+            <a href="searchContact.html" style="margin-right: 20px;">Search Contact</a>
+            <a href="index.html">Home</a>
+            
+        </div>
+        <div class="w3-container w3-content">
+            <p class="w3-opacity"><b>Insert your authentication token or</b> <button type="button" onclick="generateId()">Generate a new one</button></p>
+
+         
+            <label for="user_id">User Id:</label>
+            <input type="text" id="user_id" name="user_id" required style="width: 500px;"><br><button onclick="myFunction()">Copy to clipboard</button><br><br>
+
+
+            <p class="w3-opacity"><b>Upload</b></p>
+            <input id="file" type="file" name="file" accept="image/*" />
+            <input class="w3-button w3-blue-grey" type="submit" value="Upload" onclick="upload()" />
+
+            <p class="w3-opacity"><b>Image</b></p>
+            <div id="view" class="w3-panel w3-white w3-card w3-display-container" style="display:none;">
+                <div style="float: left;">
+                    <img id="image" width="400" height=auto />
+                </div>
+            </div>
+            <style>
+                .form-container {
+                    text-align: center;
+                }
+            </style>
+            
+        </div>
+
+        <div class="form-container">  
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br>
+        
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email"><br>
+        
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone"><br>
+        
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address"><br>
+        
+            <label for="url">URL:</label>
+            <input type="text" id="url" name="url"><br>
+            
+            <button type="button" onclick="saveAndGetMessage()">Save</button> 
+            <button type="button" onclick="downloadCsv()" id="downloadButton">Download CSV</button> 
+
+           
+        
+        
+    </div>
+    <footer style="text-align:center; margin-top: 20px;">
+        © All Rights Reserved Scan Mate 2023
+    </footer>
+</div>
+
+   
+    
+
+    <script src="scripts.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.132.0.min.js"></script>
+</body>
+
+
+
+</html>

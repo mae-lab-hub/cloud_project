@@ -1,0 +1,21 @@
+/* Style for navigation bar */
+.w3-bar {
+    position: relative;
+  }
+  
+  .w3-bar a {
+    margin-right: 20px;
+  }
+  
+  /* Style for logo and homepage image */
+  img {
+    max-width: 100%;
+  }
+  
+  /* Style for footer */
+  footer {
+    font-size: 14px;
+    color: #999;
+    margin-top: 20px;
+  }
+  

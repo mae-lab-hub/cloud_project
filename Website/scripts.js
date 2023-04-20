@@ -1,7 +1,9 @@
 "use strict";
 
 //const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
-const serverUrl = "https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
+//const serverUrl = "https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
+
+const serverUrl = "http://127.0.0.1:8000";
 let userId = "";
 
 async function uploadImage() {
@@ -200,6 +202,12 @@ function search() {
     //sending the edited contact info to the backend
     let name_search = document.getElementById("name_search").value.toLowerCase();
 
+    if (name_search == "" ){
+        alert("Name cannot be empty!");
+        return
+    }
+
+
     let data ={'user_id':userId,"lead_name":name_search}
     
     return fetch(serverUrl + "/search", {
@@ -259,6 +267,7 @@ function searchAndUpdate() {
 
 function updateContact(){
     let user_id_element = document.getElementById("user_id").value;
+ 
 
     let email = document.getElementById("email").value;
     let name = document.getElementById("name").value;
@@ -266,6 +275,15 @@ function updateContact(){
     let url = document.getElementById("url").value;
     let phone = document.getElementById("phone").value;
     
+    let name_search = document.getElementById("name_search").value.toLowerCase();
+
+    if (name_search == "" || name == ""){
+        alert("Name cannot be empty!\n Click search to get the information.");
+        return
+    }
+
+
+
     let entity_data = {// "user_id":userId,
                     "lead_name":name,
                     //"creation_date":newdate,
@@ -313,7 +331,13 @@ function deleteContact(){
     let name = document.getElementById("name").value;
     let user_id_element = document.getElementById("user_id").value;
 
-    
+     
+    let name_search = document.getElementById("name_search").value.toLowerCase();
+
+    if (name_search == "" || name == ""){
+        alert("Name cannot be empty!\n Click search to get the information.");
+        return
+    }
     let entity_data = { "lead_name":name, "current_user_id": user_id_element}
 
     return fetch(serverUrl + "/delete", {

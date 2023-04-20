@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en"/>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Contact Saver</title>
-
+    <title>Contact search</title>
+    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
 </head>
@@ -14,63 +14,26 @@
 <body class="w3-theme-14">
     <div style="min-width:400px">
         <div class="w3-bar w3-large w3-theme-d4">
-            <span class="w3-bar-item">Contact Saver</span>
+
+            <a href="upload.html" class="w3-bar-item w3-button">Upload</a>
+            <a href="searchContact.html" class="w3-bar-item w3-button">Search Contact</a>
             
         </div>
 
-        <a href="search.html">search</a>
-      
-        <p class="w3-opacity"><b>Insert your authentication token or</b> <button type="button" onclick="generateId()">Generate a new one</button></p>
-
-         
-        <label for="user_id">User Id:</label>
-        <input type="text" id="user_id" name="user_id" required><button onclick="myFunction()">Copy to clipboard</button><br>
-
-        <div class="w3-container w3-content">
-            <p class="w3-opacity"><b>Upload</b></p>
-            <input id="file" type="file" name="file" accept="image/*"/>
-            <input class="w3-button w3-blue-grey" type="submit" value="Upload"
-                   onclick="upload()"/>
-
-            <p class="w3-opacity"><b>Image</b></p>
-            <div id="view" class="w3-panel w3-white w3-card w3-display-container"
-                 style="display:none;">
-                <div style="float: left;">
-                    <img id="image" width="600"/>
-                </div>
-              
-                
-
-            </div>
-          
-
+        <!-- Adding the two images with some styling -->
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 20px;">
+            <img src="assets/logo56-sred-400h.png" alt="Logo"/>
+            <img src="assets/homepagepic13-fgnl-800w.png" alt="Homepage Picture"/>
         </div>
-
-        <div>  
-            
-            <label for="name">First name:</label>
-            <input type="text" id="name" name="name" required><br>
-
-            <label for="email">Email:</label>
-            <input type="text" id="email" name="email"><br>
-
-            <label for="phone">Phone:</label>
-            <input type="text" id="phone" name="phone"><br>
-
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address"><br>
-
-            <label for="url">URL:</label>
-            <input type="text" id="url" name="url">
-            
-            <button type="button" onclick="saveAndGetMessage()">Save</button> 
-
-        </div>
+        <footer style="text-align:center; margin-top: 20px;">
+            © All Rights Reserved Scan Mate 2023
+        </footer>
     </div>
-
+   
+</span>
     <script src="scripts.js"></script>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.132.0.min.js"></script>
-    
 </body>
 
 </html>
+
