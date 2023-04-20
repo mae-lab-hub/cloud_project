@@ -81,6 +81,7 @@ function annotateImage(data) {
     address.value =entities['address'].toLowerCase();;
     url.value =entities['website'];
     phone.value =entities['phone'];
+    downloadCsv(entities)
 }
 
 function generateId(){
@@ -164,6 +165,35 @@ function saveAndGetMessage() {
             alert("Error: " + error);
         })
 }
+
+function downloadCsv(data){
+    const csvRows = [];
+    const headers = ["name", "email", "address", "phone", "website"];
+    csvRows.push(headers.join(","));
+    const values = [
+        data.name,
+        data.email,
+        `"${data.address}"`, 
+        data.phone,
+        data.website
+      ];
+    csvRows.push(values.join(","));
+    const csvBlob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(csvBlob);
+    downloadLink.download = "data.csv";
+    downloadLink.textContent = "Download CSV";
+    document.body.appendChild(downloadLink);
+
+    downloadLink.addEventListener("click", function(event) {
+    event.preventDefault();
+    downloadLink.style.display = "none";
+    document.body.removeChild(downloadLink);
+    window.location.href = downloadLink.href;
+
+    })
+}
+
 
 
 function search() {
