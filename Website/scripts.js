@@ -1,9 +1,9 @@
 "use strict";
 
 //const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
-//const serverUrl = "https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
+const serverUrl = "https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
 
-const serverUrl = "http://127.0.0.1:8000";
+//const serverUrl = "http://127.0.0.1:8000";
 let userId = "";
 
 async function uploadImage() {
