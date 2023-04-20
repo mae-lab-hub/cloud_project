@@ -114,6 +114,12 @@ function saveContact() {
     let url = document.getElementById("url").value;
     let phone = document.getElementById("phone").value;
 
+    if (name == "" || userIdElement == ""){
+        alert("Id and lead name cannot be empty!");
+        return
+    }
+
+
     
     let entity_data = { 
                     "user_id":userIdElement,
@@ -125,7 +131,7 @@ function saveContact() {
 
                     
     console.log(entity_data)
-    alert("Conact Saved!");
+    alert("Contsact Saved!");
     return fetch(serverUrl + "/submit", {
         method: "POST",
         headers: {
@@ -204,7 +210,8 @@ function searchAndUpdate() {
 }
 
 function updateContact(){
-    
+    let user_id_element = document.getElementById("user_id").value;
+
     let email = document.getElementById("email").value;
     let name = document.getElementById("name").value;
     let address = document.getElementById("address").value;
@@ -212,7 +219,7 @@ function updateContact(){
     let phone = document.getElementById("phone").value;
     console.log("in update contact js")
     
-    let entity_data = { "user_id":userId,
+    let entity_data = {// "user_id":userId,
                     "lead_name":name,
                     //"creation_date":newdate,
                     "email":email,
@@ -221,10 +228,9 @@ function updateContact(){
                     "site":url}
 
                     console.log("Image id:")
-                    console.log(imageUserId)
+                    console.log(user_id_element)
                     console.log("User id")
                     console.log(userId)
-    alert("Contact Updated!");
     console.log(entity_data)
     return fetch(serverUrl + "/update", {
         method: "POST",
@@ -232,9 +238,10 @@ function updateContact(){
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({entity_data,imageUserId})
+        body: JSON.stringify({entity_data,user_id_element})
     }).then(response => {
         if (response.ok) {
+            console.log(response)
             return response.json();
         } else {
             throw new HttpError(response);
@@ -243,15 +250,37 @@ function updateContact(){
 }
 
 
+function checkUser(data){
+    if (data['message'] != ""){
+
+        console.log(data)
+
+        alert(data['message']);
+
+        
+    }
+}
+
+
+
+function updateAndCheckUser() {
+    updateContact()
+        .then(data => checkUser(data))
+        .catch(error => {
+            alert("Error: " + error);
+        })
+}
+
+
 function deleteContact(){
     
     let name = document.getElementById("name").value;
- 
+    let user_id_element = document.getElementById("user_id").value;
+
     
-    let entity_data = { "lead_name":name}
+    let entity_data = { "lead_name":name, "current_user_id": user_id_element}
 
     console.log(entity_data)
-    alert("Contact Deleted!");
     return fetch(serverUrl + "/delete", {
         method: "POST",
         headers: {
@@ -266,6 +295,15 @@ function deleteContact(){
             throw new HttpError(response);
         }
     })
+}
+
+
+function deleteAndCheckUser() {
+    deleteContact()
+        .then(data => checkUser(data))
+        .catch(error => {
+            alert("Error: " + error);
+        })
 }
 
 

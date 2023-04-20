@@ -20,6 +20,10 @@
         <a href="index.html">Save Contact</a>
         <h2>Please enter name to seach for contact.</h2>
 
+        <label for="user_id">User Id:</label>
+        <input type="text" id="user_id" name="user_id" required><br>
+
+
         <div>
             <label for="name">First name:</label>
             <input type="text" id="name_search" name="name" required><br>
@@ -29,9 +33,7 @@
 
         <div id="updateInputs">  
             
-            <label for="user_id">User Id:</label>
-            <input type="text" id="user_id" name="user_id"><br>
-    
+        
           
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" readonly><br>
@@ -53,8 +55,8 @@
             <label for="userid">User:</label>
             <input type="text" id="userid" name="userid">
             
-            <button type="button" onclick="updateContact()">Update</button> 
-            <button type="button" onclick="deleteContact()">Delete</button> 
+            <button type="button" onclick="updateAndCheckUser()">Update</button> 
+            <button type="button" onclick="deleteAndCheckUser()">Delete</button> 
         </div>
     
 

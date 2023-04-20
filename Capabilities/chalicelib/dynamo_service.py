@@ -13,15 +13,42 @@ class DynamoService:
         Item=data)
     
     
-    def delete_contact(self, lead_name):
+    def delete_contact(self, data):
+            lead_name = data['lead_name']
+            current_user_id = data['current_user_id']
 
-            self.table.delete_item(Key={'user_id':user_id,'lead_name': lead_name})
+            record_user_id = self.query_contacts(data['lead_name'])[0]['user_id']
+            print('record_user_id',record_user_id)
+
+            if record_user_id != current_user_id:
+                data = {'message':"Cannot delete record made by another user."}
+                return data
+
+
+            self.table.delete_item(Key={'lead_name': lead_name})
+
+            data = {'message':"Contact deleted"}
+            return data
         
-    def update_contact(self, data):
+    def update_contact(self, response):
 
-        user_id = data['user_id']
+        data = response['entity_data']
+
+        current_user_id = response['user_id_element']
+        #user_id = data[]
+        print('current_user_id:', current_user_id)
         #if user_id == to user_id in da
         #if user_id 
+
+        record_user_id = self.query_contacts(data['lead_name'])[0]['user_id']
+        print('record_user_id',record_user_id)
+
+        if record_user_id != current_user_id:
+            data = {'message':"Cannot edit record made by another user."}
+            return data
+
+
+        
 
         print("In update contact")
         response = self.table.update_item(
@@ -30,6 +57,9 @@ class DynamoService:
                         ExpressionAttributeValues={
                             ':a': data['address'], ':p': data['phone_number'],':u':data['site'],':e':data['email']},
                         ReturnValues="UPDATED_NEW")
+
+        data = {'message':"Contact Updated"}
+        return data
 
     def query_contacts(self, lead_name):
 
