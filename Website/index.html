@@ -20,9 +20,11 @@
 
         <a href="search.html">search</a>
       
-        <button type="button" onclick="generateId()">Click to new generate user Id</button> 
+        <p class="w3-opacity"><b>Insert your authentication token or</b> <button type="button" onclick="generateId()">Generate a new one</button></p>
+
+         
         <label for="user_id">User Id:</label>
-        <input type="text" id="user_id" name="user_id" required><br>
+        <input type="text" id="user_id" name="user_id" required><button onclick="myFunction()">Copy to clipboard</button><br>
 
         <div class="w3-container w3-content">
             <p class="w3-opacity"><b>Upload</b></p>
@@ -61,7 +63,7 @@
             <label for="url">URL:</label>
             <input type="text" id="url" name="url">
             
-            <button type="button" onclick="saveContact()">Save</button> 
+            <button type="button" onclick="saveAndGetMessage()">Save</button> 
             
         </div>
     </div>

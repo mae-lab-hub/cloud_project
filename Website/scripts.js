@@ -3,7 +3,7 @@
 const serverUrl = "http://127.0.0.1:8000";
 //const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
 let userId = "";
-let imageUserId =""
+
 async function uploadImage() {
     // encode input file as base64 string for upload
     let file = document.getElementById("file").files[0];
@@ -45,7 +45,6 @@ async function uploadImage() {
 function updateImage(data) {
 
     image = data[0]
-    console.log(data[1])
 
     document.getElementById("view").style.display = "block";
 
@@ -69,7 +68,6 @@ function upload() {
 
 function annotateImage(data) {
 
-
     let entities = data[1]
 
     let email = document.getElementById("email");
@@ -79,34 +77,47 @@ function annotateImage(data) {
     let phone = document.getElementById("phone");
 
     name.value =entities['name'].toLowerCase();
-    email.value =entities['email'];
-    address.value =entities['address'];
-    url.value =entities['url'];
+    email.value =entities['email'].toLowerCase();;
+    address.value =entities['address'].toLowerCase();;
+    url.value =entities['website'];
     phone.value =entities['phone'];
 }
 
 function generateId(){
-    //const imageId = 'image_' + new Date().getTime(); // Generate a new image ID
-    console.log("here")
+    //User will generate an authentication token in order to use the service
+
+  
     const newUserId = 'user_' + new Date().getTime(); // Generate a new user ID
-   // localStorage.setItem('user_id', newUserId); // Update the localStorage with the new user ID
     userId = newUserId; // Update the global variable userId
+
     let userIdElement = document.getElementById("user_id");
     userIdElement.value = userId;
 
 }
 
+//ref: https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
+function myFunction() {
+    // Get the text field
+    var copyText = document.getElementById("user_id");
+  
+    // Select the text field
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+  
+     // Copy the text inside the text field
+    navigator.clipboard.writeText(copyText.value);
+  } 
+
 function saveContact() {
     //sending the edited contact info to the backend
 
-
-    var dateObj = new Date();
-    var month = dateObj.getUTCMonth() + 1; //months from 1-12
-    var day = dateObj.getUTCDate();
-    var year = dateObj.getUTCFullYear();
-
-
     let userIdElement = document.getElementById("user_id").value;
+    let userIdFormatCorrect = /^user_\d{1,13}$/.test(userIdElement)
+
+    if (!userIdFormatCorrect){
+        alert("Authentication code requires:\n 1. Start with: user_\n 2. 1 to 13 digits\n Ex. user_111111111")
+        return
+    }
 
     let email = document.getElementById("email").value;
     let name = document.getElementById("name").value;
@@ -119,7 +130,6 @@ function saveContact() {
         return
     }
 
-
     
     let entity_data = { 
                     "user_id":userIdElement,
@@ -130,8 +140,6 @@ function saveContact() {
                     "site":url}
 
                     
-    console.log(entity_data)
-    alert("Contsact Saved!");
     return fetch(serverUrl + "/submit", {
         method: "POST",
         headers: {
@@ -149,6 +157,14 @@ function saveContact() {
 }
 
 
+function saveAndGetMessage() {
+    saveContact()
+        .then(data => GetMessage(data))
+        .catch(error => {
+            alert("Error: " + error);
+        })
+}
+
 
 function search() {
     //sending the edited contact info to the backend
@@ -156,7 +172,6 @@ function search() {
 
     let data ={'user_id':userId,"lead_name":name_search}
     
-    console.log(data)
     return fetch(serverUrl + "/search", {
         method: "POST",
         headers: {
@@ -177,8 +192,13 @@ function search() {
 
 function  edit_info(contact){
 
-    console.log("here")
-    imageUserId = contact['user_id']
+    if (contact["message"]=="Contact not found.") {
+        alert(contact['message']);
+
+        return
+    }
+
+
     let email = document.getElementById("email");
     let name = document.getElementById("name");
     let address = document.getElementById("address");
@@ -187,15 +207,13 @@ function  edit_info(contact){
    // let user_id_element = document.getElementById("userid");
 
 
-    let data = contact[0]
+    let data = contact['items'][0]
     name.value =data['lead_name'];
     email.value =data['email'];
     address.value =data['address'];
     url.value =data['site'];
     phone.value =data['phone_number'];
-   // user_id_element.value = data['user_id']
 
-    console.log( data['user_id'])
 
 
 }
@@ -217,7 +235,6 @@ function updateContact(){
     let address = document.getElementById("address").value;
     let url = document.getElementById("url").value;
     let phone = document.getElementById("phone").value;
-    console.log("in update contact js")
     
     let entity_data = {// "user_id":userId,
                     "lead_name":name,
@@ -227,11 +244,6 @@ function updateContact(){
                     "phone_number":phone,
                     "site":url}
 
-                    console.log("Image id:")
-                    console.log(user_id_element)
-                    console.log("User id")
-                    console.log(userId)
-    console.log(entity_data)
     return fetch(serverUrl + "/update", {
         method: "POST",
         headers: {
@@ -241,7 +253,6 @@ function updateContact(){
         body: JSON.stringify({entity_data,user_id_element})
     }).then(response => {
         if (response.ok) {
-            console.log(response)
             return response.json();
         } else {
             throw new HttpError(response);
@@ -250,22 +261,17 @@ function updateContact(){
 }
 
 
-function checkUser(data){
+function GetMessage(data){
     if (data['message'] != ""){
-
-        console.log(data)
-
-        alert(data['message']);
-
-        
+        alert(data['message']);   
     }
 }
 
 
 
-function updateAndCheckUser() {
+function updateAndGetMessage() {
     updateContact()
-        .then(data => checkUser(data))
+        .then(data => GetMessage(data))
         .catch(error => {
             alert("Error: " + error);
         })
@@ -280,7 +286,6 @@ function deleteContact(){
     
     let entity_data = { "lead_name":name, "current_user_id": user_id_element}
 
-    console.log(entity_data)
     return fetch(serverUrl + "/delete", {
         method: "POST",
         headers: {
@@ -298,14 +303,29 @@ function deleteContact(){
 }
 
 
-function deleteAndCheckUser() {
+function deleteAndGetMessage() {
     deleteContact()
-        .then(data => checkUser(data))
+        .then(data => GetMessage(data))
+        .then(resetInputs())
         .catch(error => {
             alert("Error: " + error);
         })
 }
 
+function resetInputs(){
+
+    let email = document.getElementById("email");
+    let name = document.getElementById("name");
+    let address = document.getElementById("address");
+    let url = document.getElementById("url");
+    let phone = document.getElementById("phone");
+
+    name.value = "";
+    email.value ="";
+    address.value ="";
+    url.value ="";
+    phone.value ="";
+}
 
 class HttpError extends Error {
     constructor(response) {

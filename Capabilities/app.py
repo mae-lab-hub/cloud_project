@@ -34,10 +34,7 @@ def upload_image():
     request_data = json.loads(app.current_request.raw_body)
     file_name = request_data['filename']
     file_bytes = base64.b64decode(request_data['filebytes'])
-    user_id = request_data['userid']
 
-    print("HEREEEEEE")
-    print("User id:", user_id)
     image_info = storage_service.upload_file(file_bytes, file_name)
     text_lines = recognition_service.detect_text(file_name)
 
@@ -74,15 +71,13 @@ def upload_image():
                 website.append(en['Text'])
         
 
-    #for now we just join all the same entities together and the user can remove the one they want
-    #possible changes: each of the same entity is an option in a dropdown menu, but then if the user wants both entities saved together it wil be complicated to edit, example: New York and Florence st.
-
+    # join all the same entities together and the user can remove the one they want
+    
     name = "  ".join(name)
     email  = " ".join(email)
     phone = " ".join(phone)
     address = " ".join(address)
     website = " ".join(website)
-
 
 
     entity_data = { "name":name,
@@ -99,13 +94,8 @@ def upload_image():
 @app.route('/submit', methods = ['POST'], cors = True)
 def get_contact():
     contact_data = json.loads(app.current_request.raw_body)
-    print(contact_data)
-
-    print("user in submit", contact_data['user_id'])
-    #dynamo_service.user_id = contact_data['user_id']
-
-    #iam_service.list_users()
-    dynamo_service.save_item(contact_data)
+    response = dynamo_service.save_item(contact_data)
+    return response
 
 
 @app.route('/search', methods = ['POST'], cors = True)
@@ -115,24 +105,20 @@ def search_contact():
     lead_name = data['lead_name']
     user_id = data['user_id']
 
-    print(lead_name)
-    items = dynamo_service.query_contacts(lead_name)
-    print("in serach:", items)
-    #print("Dnamo id:", dynamo_service.user_id )
-    return items
+    response = dynamo_service.query_contacts(lead_name)
+    return response
 
 
 @app.route('/update', methods = ['POST'], cors = True)
-def search_contact():
+def update_contact():
     print('in update site')
     data = json.loads(app.current_request.raw_body)
     response = dynamo_service.update_contact(data)
-    print(response)
     return response
 
     
 @app.route('/delete', methods = ['POST'], cors = True)
-def search_contact():
+def delete_contact():
     print('in delete site')
     data = json.loads(app.current_request.raw_body)
     #lead_name = data['lead_name']
