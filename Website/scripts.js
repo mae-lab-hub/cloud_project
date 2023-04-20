@@ -1,7 +1,7 @@
 "use strict";
 
-const serverUrl = "http://127.0.0.1:8000";
 //const serverUrl = " https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
+const serverUrl = "https://vpbzktcaxf.execute-api.us-east-1.amazonaws.com/api/";
 let userId = "";
 
 async function uploadImage() {
@@ -198,7 +198,7 @@ function downloadCsv(data){
 
 function search() {
     //sending the edited contact info to the backend
-    let name_search = document.getElementById("name_search").value;
+    let name_search = document.getElementById("name_search").value.toLowerCase();
 
     let data ={'user_id':userId,"lead_name":name_search}
     
